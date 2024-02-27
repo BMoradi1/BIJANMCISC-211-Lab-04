@@ -55,10 +55,21 @@ asmFunc:
 
     /* save the caller's registers, as required by the ARM calling convention */
     push {r4-r11,LR}
- 
+    STR
     
     /*** STUDENTS: Place your code BELOW this line!!! **************/
-
+    
+    LDR r1, = transaction
+    STR r0, [r1]
+    CMP r0, 1000 /* Check if r0(transaction) > 1000*/
+    BGT invalid
+    CMP r0, -1000 /*Check if r0 (transaction) < -100*/
+    BGT invalid
+    
+    invalid:
+	LDR r3, = balance
+	STR r0, [r3]
+    
     
     /*** STUDENTS: Place your code ABOVE this line!!! **************/
 
