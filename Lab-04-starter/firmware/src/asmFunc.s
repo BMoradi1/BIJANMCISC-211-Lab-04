@@ -55,22 +55,75 @@ asmFunc:
 
     /* save the caller's registers, as required by the ARM calling convention */
     push {r4-r11,LR}
-    STR
+    
     
     /*** STUDENTS: Place your code BELOW this line!!! **************/
-    
+    /*set up our words*/
     LDR r1, = transaction
     STR r0, [r1]
-    CMP r0, 1000 /* Check if r0(transaction) > 1000*/
-    BGT invalid
-    CMP r0, -1000 /*Check if r0 (transaction) < -100*/
-    BGT invalid
+    /*zero everything*/
+    LDR r5, = eat_ice_cream
+    MOV r4, 0
+    STR r4, [r5]
+    LDR r5, = eat_out
+    STR r4, [r5]
+    LDR r5, = stay_in
+    STR r4, [r5]
+    LDR r5, = we_have_a_problem
+    STR r4, [r5]
+ 
     
+    CMP r0, 1000 /* Check if r0(transaction) > 1000*/
+    BGT invalid /*not valid according to fllow chart*/
+    CMP r0, -1000 /*Check if r0 (transaction) < -100*/
+    BLT invalid
+    
+    /*We will use r10 for tmpBalance*/
+
+    LDR r1, = balance
+    LDR r2, [r1]
+    LDR r3, = transaction
+    LDR r4, [r3]
+    ADDS r10, r2, r0 /* add Bal + Tranaction then store in tempBal which I decided is r10*/
+    BVS invalid
+
+    LDR r1, = balance
+    STR r10, [r1]
+    LDR r3, [r1]
+    CMP r3, 0
+    BGT eatout /*check if bal > 0*/
+    BLT stayin
+    B eatcream /*was not geater or less than so must be 0*/
+    eatout:
+	MOV r4, 1
+	LDR r1, = eat_out
+	STR r4, [r1]
+	B cleanup
+    stayin:
+	MOV r4, 1
+	LDR r1, = stay_in
+	STR r4, [r1]
+	B cleanup
+
+    eatcream:
+	MOV r4, 1
+	LDR r1, = eat_ice_cream
+	STR r4, [r1]
+    /*set the balance like the flowchart says*/
+    cleanup: 
+	LDR r4, = balance
+	LDR r0, [r4]
+	B done
     invalid:
 	LDR r3, = balance
-	STR r0, [r3]
-    
-    
+	LDR r0, [r3]
+	MOV r4, 0
+	LDR r1, = transaction
+	STR r4, [r1]
+	MOV r4, 1
+	LDR r1, = we_have_a_problem
+	STR r4, [r1]
+	B done
     /*** STUDENTS: Place your code ABOVE this line!!! **************/
 
 done:    
