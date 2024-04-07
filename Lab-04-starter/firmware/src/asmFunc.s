@@ -63,6 +63,7 @@ asmFunc:
     STR r0, [r1]
     /*zero everything*/
     LDR r5, = eat_ice_cream
+    /*set r4 to 0, use r5 to store memory address of the variable, then set it to 0 with r4*/
     MOV r4, 0
     STR r4, [r5]
     LDR r5, = eat_out
@@ -74,46 +75,47 @@ asmFunc:
  
     
     CMP r0, 1000 /* Check if r0(transaction) > 1000*/
-    BGT invalid /*not valid according to fllow chart*/
-    CMP r0, -1000 /*Check if r0 (transaction) < -100*/
-    BLT invalid
+    BGT invalid /*check flags. Transaction greater than 1000. not valid according to fllow chart*/
+    CMP r0, -1000 /*Transaction less than -1000. Check if r0 (transaction) < -1000*/
+    BLT invalid /*check flags. Transaction less than than -1000. not valid according to fllow chart*/
     
     /*We will use r10 for tmpBalance*/
 
-    LDR r1, = balance
-    LDR r2, [r1]
-    LDR r3, = transaction
-    LDR r4, [r3]
+    LDR r1, = balance /*grab memory location of balance, put it in r1*/
+    LDR r2, [r1] /*set r2 to the value located at the memory address in r1*/ 
+    LDR r3, = transaction /*grab memory location of transaction and put it in r3*/
+    LDR r4, [r3] /*load the value in memory address stored in r3 to r4*/
     ADDS r10, r2, r0 /* add Bal + Tranaction then store in tempBal which I decided is r10*/
-    BVS invalid
+    BVS invalid /*check overflow flag*/
 
-    LDR r1, = balance
+    LDR r1, = balance /* Balance valid, load temp balance into main balance*/
     STR r10, [r1]
     LDR r3, [r1]
-    CMP r3, 0
+    CMP r3, 0 /*compare r3 with 0 then check condition flags*/
     BGT eatout /*check if bal > 0*/
-    BLT stayin
+    BLT stayin /* check if bal < 0 */
     B eatcream /*was not geater or less than so must be 0*/
-    eatout:
-	MOV r4, 1
+    eatout: /*eatout label which is branched too when balance > 0*/
+	MOV r4, 1 /*setting eat_out to 1*/
 	LDR r1, = eat_out
 	STR r4, [r1]
-	B cleanup
-    stayin:
-	MOV r4, 1
+	B cleanup /*go to final step in the flowchart, branch to skip next instructions*/
+    stayin:/*stayin label which is branched too when balance < 0*/
+	MOV r4, 1 /*set stay_in to 1*/
 	LDR r1, = stay_in
 	STR r4, [r1]
-	B cleanup
+	B cleanup/*go to final step in the flowchart*/
 
-    eatcream:
+    eatcream: /*eat cream label triggered when bal is 0*/
 	MOV r4, 1
 	LDR r1, = eat_ice_cream
-	STR r4, [r1]
+	STR r4, [r1] /*no need to branch because cleanup comes right after*/
     /*set the balance like the flowchart says*/
     cleanup: 
 	LDR r4, = balance
 	LDR r0, [r4]
 	B done
+    /*Transaction invalid, set condition and variables based off the flowchart*/
     invalid:
 	LDR r3, = balance
 	LDR r0, [r3]
